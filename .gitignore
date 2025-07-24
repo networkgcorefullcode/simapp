@@ -10,7 +10,7 @@ GTAGS
 TAGS
 tags
 cscope.*
-
+bin/
 # debug
 *.log
 *.pcap
