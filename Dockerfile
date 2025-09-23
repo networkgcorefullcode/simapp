@@ -14,6 +14,13 @@ RUN apt-get update && \
 RUN go install github.com/go-task/task/v3/cmd/task@latest
 
 WORKDIR $GOPATH/src/simapp
+
+COPY go.mod .
+COPY go.sum .
+COPY Taskfile.yml .
+
+RUN task mod-start
+
 COPY . .
 RUN task build
 
@@ -27,8 +34,8 @@ ARG DEBUG_TOOLS
 
 # Install debug tools ~ 50MB (if DEBUG_TOOLS is set to true)
 RUN if [ "$DEBUG_TOOLS" = "true" ]; then \
-        apk update && apk add --no-cache -U gcompat vim strace net-tools curl netcat-openbsd bind-tools bash; \
-        fi
+    apk update && apk add --no-cache -U gcompat vim strace net-tools curl netcat-openbsd bind-tools bash; \
+    fi
 
 # Copy executable
 COPY --from=builder /go/src/simapp/bin/* /usr/local/bin/.
