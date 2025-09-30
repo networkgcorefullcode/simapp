@@ -60,6 +60,7 @@ type Configuration struct {
 	Subscriber          []*Subscriber      `yaml:"subscribers,omitempty"`
 	SubProvisionEndpt   *SubProvisionEndpt `yaml:"sub-provision-endpt,omitempty"`
 	SubProxyEndpt       *SubProxyEndpt     `yaml:"sub-proxy-endpt,omitempty"`
+	MaxTimeInterval     uint               `yaml:"max-time-interval,omitempty"`
 }
 
 type DevGroup struct {
@@ -290,6 +291,10 @@ func InitConfigFactory(f string, configMsgChan chan configMessage, subProvisionE
 		subProxyEndpt.Port = SimappConfig.Configuration.SubProxyEndpt.Port
 	}
 
+	if SimappConfig.Configuration.MaxTimeInterval == 0 {
+		SimappConfig.Configuration.MaxTimeInterval = 10
+	}
+
 	viper.SetConfigFile(f)
 	viper.SetConfigType("yaml")
 	err := viper.ReadInConfig() // Find and read the config file
@@ -367,8 +372,8 @@ func getNextBackoffInterval(retry, interval uint) uint {
 	mFactor := 1.5
 	nextInterval := float64(retry*interval) * mFactor
 
-	if nextInterval > 10 {
-		return 10
+	if nextInterval > float64(SimappConfig.Configuration.MaxTimeInterval) {
+		return SimappConfig.Configuration.MaxTimeInterval
 	}
 
 	return uint(nextInterval)
