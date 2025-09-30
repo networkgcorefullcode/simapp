@@ -273,11 +273,11 @@ func InitConfigFactory(f string, configMsgChan chan configMessage, subProvisionE
 					return net.Dial(network, addr)
 				},
 			},
-			Timeout: 5 * time.Second,
+			Timeout: time.Duration(SimappConfig.Configuration.MaxTimeInterval) * time.Second,
 		}
 	} else {
 		client = &http.Client{
-			Timeout: 5 * time.Second,
+			Timeout: time.Duration(SimappConfig.Configuration.MaxTimeInterval) * time.Second,
 		}
 	}
 
