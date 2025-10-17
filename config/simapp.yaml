@@ -20,6 +20,8 @@ configuration:
     op: ""
     key: 8baf473f2f8fd09487cccbd7097c6862
     sequenceNumber: 16f3b3f70fc2
+    k4_sno: 1
+    encryption_algorithm: 0
   - ueId-start: 123456789123460
     ueId-end: 123456789123465
     plmnId: 222222

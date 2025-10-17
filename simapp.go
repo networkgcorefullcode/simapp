@@ -82,14 +82,16 @@ type IpDomain struct {
 }
 
 type Subscriber struct {
-	UeId           string
-	UeIdStart      string `yaml:"ueId-start,omitempty" json:"-"`
-	UeIdEnd        string `yaml:"ueId-end,omitempty" json:"-"`
-	PlmnId         string `yaml:"plmnId,omitempty" json:"plmnId,omitempty"`
-	OPc            string `yaml:"opc,omitempty" json:"opc,omitempty"`
-	OP             string `yaml:"op,omitempty" json:"op,omitempty"`
-	Key            string `yaml:"key,omitempty" json:"key,omitempty"`
-	SequenceNumber string `yaml:"sequenceNumber,omitempty" json:"sequenceNumber,omitempty"`
+	UeId                string `json:"-"`
+	UeIdStart           string `yaml:"ueId-start,omitempty" json:"-"`
+	UeIdEnd             string `yaml:"ueId-end,omitempty" json:"-"`
+	PlmnId              string `yaml:"plmnId,omitempty" json:"plmnId,omitempty"`
+	OPc                 string `yaml:"opc,omitempty" json:"opc,omitempty"`
+	OP                  string `yaml:"op,omitempty" json:"op,omitempty"`
+	Key                 string `yaml:"key,omitempty" json:"key,omitempty"`
+	SequenceNumber      string `yaml:"sequenceNumber,omitempty" json:"sequenceNumber,omitempty"`
+	K4Sno               *byte  `yaml:"k4_sno,omitempty" json:"k4_sno,omitempty"`
+	EncryptionAlgorithm *int32 `yaml:"encryption_algorithm,omitempty" json:"encryption_algorithm,omitempty"`
 }
 
 type SubProvisionEndpt struct {
