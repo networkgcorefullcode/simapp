@@ -272,11 +272,19 @@ func InitConfigFactory(f string, configMsgChan chan configMessage, subProvisionE
 				DialTLS: func(network, addr string, _ *tls.Config) (net.Conn, error) {
 					return net.Dial(network, addr)
 				},
+				TLSClientConfig: &tls.Config{
+					InsecureSkipVerify: true,
+				},
 			},
 			Timeout: 35 * time.Second,
 		}
 	} else {
 		client = &http.Client{
+			Transport: &http.Transport{
+				TLSClientConfig: &tls.Config{
+					InsecureSkipVerify: true,
+				},
+			},
 			Timeout: 35 * time.Second,
 		}
 	}
