@@ -193,7 +193,7 @@ const (
 	subscriber
 )
 
-const httpProtocol = "http://"
+const httpProtocol = "https://"
 
 type configMessage struct {
 	msgPtr  *bytes.Buffer
