@@ -61,6 +61,7 @@ type Configuration struct {
 	SubProvisionEndpt   *SubProvisionEndpt `yaml:"sub-provision-endpt,omitempty"`
 	SubProxyEndpt       *SubProxyEndpt     `yaml:"sub-proxy-endpt,omitempty"`
 	MaxTimeInterval     uint               `yaml:"max-time-interval,omitempty"`
+	TimeOut             uint               `yaml:"http-timeout,omitempty"`
 }
 
 type DevGroup struct {
@@ -264,6 +265,10 @@ func InitConfigFactory(f string, configMsgChan chan configMessage, subProvisionE
 		return nil
 	}
 
+	if SimappConfig.Configuration.TimeOut == 0 {
+		SimappConfig.Configuration.TimeOut = 35
+	}
+
 	// set http client
 	if SimappConfig.Info.HttpVersion == 2 {
 		client = &http.Client{
@@ -276,7 +281,7 @@ func InitConfigFactory(f string, configMsgChan chan configMessage, subProvisionE
 					InsecureSkipVerify: true,
 				},
 			},
-			Timeout: 35 * time.Second,
+			Timeout: time.Duration(SimappConfig.Configuration.TimeOut) * time.Second,
 		}
 	} else {
 		client = &http.Client{
@@ -285,7 +290,7 @@ func InitConfigFactory(f string, configMsgChan chan configMessage, subProvisionE
 					InsecureSkipVerify: true,
 				},
 			},
-			Timeout: 35 * time.Second,
+			Timeout: time.Duration(SimappConfig.Configuration.TimeOut) * time.Second,
 		}
 	}
 
