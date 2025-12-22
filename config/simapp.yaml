@@ -13,6 +13,7 @@ logger:
     debugLevel: info
 
 configuration:
+  http-protocol: "http"
   max-time-interval: 35
   provision-network-slice: true # if enabled, Device Groups & Slices configure by simapp
   sub-provision-endpt:

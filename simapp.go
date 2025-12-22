@@ -63,6 +63,7 @@ type Configuration struct {
 	SubProxyEndpt       *SubProxyEndpt     `yaml:"sub-proxy-endpt,omitempty"`
 	MaxTimeInterval     uint               `yaml:"max-time-interval,omitempty"`
 	TimeOut             uint               `yaml:"http-timeout,omitempty"`
+	HttpProtocol        string             `yaml:"http-protocol,omitempty"`
 }
 
 type DevGroup struct {
@@ -197,7 +198,7 @@ const (
 	subscriber
 )
 
-const httpProtocol = "%s://"
+var httpProtocol string
 
 type configMessage struct {
 	msgPtr  *bytes.Buffer
@@ -289,6 +290,10 @@ func InitConfigFactory(f string, configMsgChan chan configMessage, subProvisionE
 
 	if SimappConfig.Configuration.TimeOut == 0 {
 		SimappConfig.Configuration.TimeOut = 35
+	}
+
+	if SimappConfig.Configuration.HttpProtocol == "http" || SimappConfig.Configuration.HttpProtocol == "https" {
+		httpProtocol = fmt.Sprintf("%s://", SimappConfig.Configuration.HttpProtocol)
 	}
 
 	// set http client
