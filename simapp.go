@@ -12,6 +12,7 @@ import (
 	"crypto/tls"
 	"encoding/hex"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"net"
@@ -68,6 +69,8 @@ type DevGroup struct {
 	Name         string    `yaml:"name,omitempty"`
 	SiteInfo     string    `yaml:"site-info,omitempty" json:"site-info,omitempty"`
 	Imsis        []string  `yaml:"imsis,omitempty" json:"imsis,omitempty"`
+	ImsiStart    string    `yaml:"imsi-start,omitempty"`
+	ImsiEnd      string    `yaml:"imsi-end,omitempty"`
 	IpDomainName string    `yaml:"ip-domain-name,omitempty" json:"ip-domain-name,omitempty"`
 	IpDomain     *IpDomain `yaml:"ip-domain-expanded,omitempty" json:"ip-domain-expanded,omitempty"`
 	visited      bool
@@ -242,6 +245,25 @@ func InitConfigFactory(f string, configMsgChan chan configMessage, subProvisionE
 		if yamlErr := yaml.Unmarshal(content, &SimappConfig); yamlErr != nil {
 			logger.SimappLog.Errorln("yaml parsing failed", yamlErr)
 			return yamlErr
+		}
+	}
+
+	for _, devGroup := range SimappConfig.Configuration.DevGroup {
+		if len(devGroup.Imsis) == 0 {
+			logger.SimappLog.Warnf("Imsis are equal to 0 check for imsi-start or imsi-end config specs")
+			im1, _ := strconv.Atoi(devGroup.ImsiStart)
+			im2, _ := strconv.Atoi(devGroup.ImsiEnd)
+			if im1 < im2 && (im1 > 0 && im2 > 0) &&
+				(len(devGroup.ImsiStart) == 15 &&
+					len(devGroup.ImsiEnd) == 15) {
+
+				for i := im1; i <= im2; i++ {
+					devGroup.Imsis = append(devGroup.Imsis, strconv.Itoa(i))
+				}
+			}
+		}
+		if len(devGroup.Imsis) == 0 {
+			return errors.New("error: the imsis for a dev group are empty")
 		}
 	}
 
