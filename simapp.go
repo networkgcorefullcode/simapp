@@ -26,11 +26,13 @@ import (
 
 	"github.com/fsnotify/fsnotify"
 	"github.com/omec-project/simapp/logger"
+
 	"github.com/spf13/viper"
 	"github.com/urfave/cli/v3"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 	"golang.org/x/net/http2"
+	"golang.org/x/sync/errgroup"
 	"gopkg.in/yaml.v2"
 )
 
@@ -992,22 +994,29 @@ func dispatchAllSubscribers(configMsgChan chan configMessage) {
 			logger.SimappLog.Errorln("error in Atoi with UeIdEnd", err)
 			continue
 		}
+		// Compute with concurrency
+		g := errgroup.Group{}
+		g.SetLimit(100)
 		for i := start; i <= end; i++ {
-			subscribers.UeId = fmt.Sprintf("%015d", i)
-			logger.SimappLog.Debugln("ueId", subscribers.UeId)
-			b, err := json.Marshal(subscribers)
-			if err != nil {
-				logger.SimappLog.Errorln("error in marshal with subscribers", err)
-				continue
-			}
-			reqMsgBody := bytes.NewBuffer(b)
-			var msg configMessage
-			msg.msgPtr = reqMsgBody
-			msg.msgType = subscriber
-			msg.name = subscribers.UeId
-			msg.msgOp = add_op
-			configMsgChan <- msg
+			g.Go(func() error {
+				subscribers.UeId = fmt.Sprintf("%015d", i)
+				logger.SimappLog.Debugln("ueId", subscribers.UeId)
+				b, err := json.Marshal(subscribers)
+				if err != nil {
+					logger.SimappLog.Errorln("error in marshal with subscribers", err)
+					return err
+				}
+				reqMsgBody := bytes.NewBuffer(b)
+				var msg configMessage
+				msg.msgPtr = reqMsgBody
+				msg.msgType = subscriber
+				msg.name = subscribers.UeId
+				msg.msgOp = add_op
+				configMsgChan <- msg
+				return nil
+			})
 		}
+		g.Wait()
 	}
 }
 

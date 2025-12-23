@@ -8,6 +8,7 @@ require (
 	github.com/urfave/cli/v3 v3.3.8
 	go.uber.org/zap v1.27.0
 	golang.org/x/net v0.42.0
+	golang.org/x/sync v0.16.0
 	gopkg.in/yaml.v2 v2.4.0
 )
 
