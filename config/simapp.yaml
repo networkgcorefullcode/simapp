@@ -69,7 +69,7 @@ configuration:
   device-groups:
   - name:  "gnbsim-user-group1"
     imsi-start: "208930100007487"
-    imsi-end: "208930100008000"
+    imsi-end: "208930100017487"
     ip-domain-name: "pool1"
     ip-domain-expanded:
       dnn: internet
