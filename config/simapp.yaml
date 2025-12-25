@@ -16,6 +16,7 @@ configuration:
   http-protocol: "http"
   http-timeout: 1000
   max-time-interval: 35
+  max-send-chan-size: 10
   provision-network-slice: true # if enabled, Device Groups & Slices configure by simapp
   sub-provision-endpt:
     addr: localhost # subscriber configuation endpoint.
@@ -29,7 +30,7 @@ configuration:
   # This block is always necessary to establish range(s) of valid IMSIs
   subscribers:
   - ueId-start: "208930100007487"
-    ueId-end: "208930100017487"
+    ueId-end: "208930100027510"
     # ueId-end: "208930100007500"
     plmnId: "20893"
     opc: "981d464c7c52eb6e5036234984ad0bcf"
@@ -69,7 +70,7 @@ configuration:
   device-groups:
   - name:  "gnbsim-user-group1"
     imsi-start: "208930100007487"
-    imsi-end: "208930100017487"
+    imsi-end: "208930100027510"
     ip-domain-name: "pool1"
     ip-domain-expanded:
       dnn: internet

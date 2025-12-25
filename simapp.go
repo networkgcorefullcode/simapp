@@ -65,6 +65,7 @@ type Configuration struct {
 	MaxTimeInterval     uint               `yaml:"max-time-interval,omitempty"`
 	TimeOut             uint               `yaml:"http-timeout,omitempty"`
 	HttpProtocol        string             `yaml:"http-protocol,omitempty"`
+	MaxSend             int                `yaml:"max-send-chan-size,omitempty"`
 }
 
 type DevGroup struct {
@@ -236,7 +237,7 @@ var (
 	client        *http.Client
 )
 
-func InitConfigFactory(f string, configMsgChan chan configMessage, subProvisionEndpt *SubProvisionEndpt, subProxyEndpt *SubProxyEndpt) error {
+func InitConfigFactory(f string, subProvisionEndpt *SubProvisionEndpt, subProxyEndpt *SubProxyEndpt) error {
 	logger.SimappLog.Infoln("function called", f)
 	if content, err := os.ReadFile(f); err != nil {
 		logger.SimappLog.Infoln("readfile failed called", err)
@@ -291,6 +292,10 @@ func InitConfigFactory(f string, configMsgChan chan configMessage, subProvisionE
 
 	if SimappConfig.Configuration.TimeOut == 0 {
 		SimappConfig.Configuration.TimeOut = 35
+	}
+
+	if SimappConfig.Configuration.MaxSend == 0 {
+		SimappConfig.Configuration.MaxSend = 100
 	}
 
 	if SimappConfig.Configuration.HttpProtocol == "http" || SimappConfig.Configuration.HttpProtocol == "https" {
@@ -375,7 +380,6 @@ func main() {
 
 func action(ctx context.Context, c *cli.Command) error {
 	logger.SimappLog.Infoln("SIMApp started")
-	configMsgChan = make(chan configMessage, 100)
 	var subProvisionEndpt SubProvisionEndpt
 	var subProxyEndpt SubProxyEndpt
 
@@ -386,7 +390,8 @@ func action(ctx context.Context, c *cli.Command) error {
 		return err
 	}
 
-	err = InitConfigFactory(absPath, configMsgChan, &subProvisionEndpt, &subProxyEndpt)
+	err = InitConfigFactory(absPath, &subProvisionEndpt, &subProxyEndpt)
+	configMsgChan = make(chan configMessage, SimappConfig.Configuration.MaxSend)
 	if err != nil {
 		logger.SimappLog.Errorln(err)
 	}
@@ -507,88 +512,90 @@ func sendMessage(msgChan chan configMessage, subProvisionEndpt SubProvisionEndpt
 	}
 
 	for msg := range msgChan {
-		var httpend string
-		var destUrl string
-		logger.SimappLog.Debugln("received message from channel", msg)
-		switch msg.msgType {
-		case device_group:
-			httpend = devGroupHttpend + msg.name
-		case network_slice:
-			httpend = networkSliceHttpend + msg.name
-		case subscriber:
-			httpend = subscriberHttpend + msg.name
-			destUrl = baseDestUrl + msg.name
-		}
-		var rsp *http.Response
-		var httpErr error
-		for {
-			if msg.msgOp == add_op {
-				logger.SimappLog.Infof("post message [%v] to %v", msg.String(), httpend)
-				req, err := http.NewRequestWithContext(context.Background(), http.MethodPost, httpend, msg.msgPtr)
-				if err != nil {
-					logger.SimappLog.Errorf("an error occurred %v", err)
-					time.Sleep(1 * time.Second)
-					continue
-				}
-
-				req.Header.Set("Content-Type", "application/json; charset=utf-8")
-				if subProxyEndpt.Port != "" {
-					req.Header.Add("Dest-Url", destUrl)
-				}
-				rsp, httpErr = sendHttpReqMsg(req)
-				if httpErr != nil {
-					logger.SimappLog.Errorf("post message [%v] returned error [%v]", httpend, httpErr.Error())
-				}
-
-				logger.SimappLog.Infof("message POST %v success", rsp.StatusCode)
-			} else if msg.msgOp == modify_op {
-				logger.SimappLog.Infof("put message [%v] to %v", msg.String(), httpend)
-
-				req, err := http.NewRequestWithContext(context.Background(), http.MethodPut, httpend, msg.msgPtr)
-				// Handle Error
-				if err != nil {
-					logger.SimappLog.Errorf("an error occurred %v", err)
-					time.Sleep(1 * time.Second)
-					continue
-				}
-				// set the request header Content-Type for json
-				req.Header.Set("Content-Type", "application/json; charset=utf-8")
-				if subProxyEndpt.Port != "" {
-					req.Header.Add("Dest-Url", destUrl)
-				}
-				rsp, httpErr = sendHttpReqMsg(req)
-				if httpErr != nil {
-					logger.SimappLog.Errorf("put message [%v] returned error [%v]", httpend, httpErr.Error())
-				}
-
-				logger.SimappLog.Infof("message PUT %v success", rsp.StatusCode)
-			} else if msg.msgOp == delete_op {
-				logger.SimappLog.Infof("delete message [%v] to %v", msg.String(), httpend)
-
-				req, err := http.NewRequestWithContext(context.Background(), http.MethodDelete, httpend, msg.msgPtr)
-				// Handle Error
-				if err != nil {
-					logger.SimappLog.Errorf("an error occurred %v", err)
-					time.Sleep(1 * time.Second)
-					continue
-				}
-				// set the request header Content-Type for json
-				req.Header.Set("Content-Type", "application/json; charset=utf-8")
-				if subProxyEndpt.Port != "" {
-					req.Header.Add("Dest-Url", destUrl)
-				}
-				rsp, httpErr = sendHttpReqMsg(req)
-				if httpErr != nil {
-					logger.SimappLog.Errorf("delete message [%v] returned error [%v]", httpend, httpErr.Error())
-				}
-				logger.SimappLog.Infof("message DEL %v success", rsp.StatusCode)
+		go func() {
+			var httpend string
+			var destUrl string
+			logger.SimappLog.Debugln("received message from channel", msg)
+			switch msg.msgType {
+			case device_group:
+				httpend = devGroupHttpend + msg.name
+			case network_slice:
+				httpend = networkSliceHttpend + msg.name
+			case subscriber:
+				httpend = subscriberHttpend + msg.name
+				destUrl = baseDestUrl + msg.name
 			}
-			err := rsp.Body.Close()
-			if err != nil {
-				logger.SimappLog.Errorln(err)
+			var rsp *http.Response
+			var httpErr error
+			for {
+				if msg.msgOp == add_op {
+					logger.SimappLog.Infof("post message [%v] to %v", msg.String(), httpend)
+					req, err := http.NewRequestWithContext(context.Background(), http.MethodPost, httpend, msg.msgPtr)
+					if err != nil {
+						logger.SimappLog.Errorf("an error occurred %v", err)
+						time.Sleep(1 * time.Second)
+						continue
+					}
+
+					req.Header.Set("Content-Type", "application/json; charset=utf-8")
+					if subProxyEndpt.Port != "" {
+						req.Header.Add("Dest-Url", destUrl)
+					}
+					rsp, httpErr = sendHttpReqMsg(req)
+					if httpErr != nil {
+						logger.SimappLog.Errorf("post message [%v] returned error [%v]", httpend, httpErr.Error())
+					}
+
+					logger.SimappLog.Infof("message POST %v success", rsp.StatusCode)
+				} else if msg.msgOp == modify_op {
+					logger.SimappLog.Infof("put message [%v] to %v", msg.String(), httpend)
+
+					req, err := http.NewRequestWithContext(context.Background(), http.MethodPut, httpend, msg.msgPtr)
+					// Handle Error
+					if err != nil {
+						logger.SimappLog.Errorf("an error occurred %v", err)
+						time.Sleep(1 * time.Second)
+						continue
+					}
+					// set the request header Content-Type for json
+					req.Header.Set("Content-Type", "application/json; charset=utf-8")
+					if subProxyEndpt.Port != "" {
+						req.Header.Add("Dest-Url", destUrl)
+					}
+					rsp, httpErr = sendHttpReqMsg(req)
+					if httpErr != nil {
+						logger.SimappLog.Errorf("put message [%v] returned error [%v]", httpend, httpErr.Error())
+					}
+
+					logger.SimappLog.Infof("message PUT %v success", rsp.StatusCode)
+				} else if msg.msgOp == delete_op {
+					logger.SimappLog.Infof("delete message [%v] to %v", msg.String(), httpend)
+
+					req, err := http.NewRequestWithContext(context.Background(), http.MethodDelete, httpend, msg.msgPtr)
+					// Handle Error
+					if err != nil {
+						logger.SimappLog.Errorf("an error occurred %v", err)
+						time.Sleep(1 * time.Second)
+						continue
+					}
+					// set the request header Content-Type for json
+					req.Header.Set("Content-Type", "application/json; charset=utf-8")
+					if subProxyEndpt.Port != "" {
+						req.Header.Add("Dest-Url", destUrl)
+					}
+					rsp, httpErr = sendHttpReqMsg(req)
+					if httpErr != nil {
+						logger.SimappLog.Errorf("delete message [%v] returned error [%v]", httpend, httpErr.Error())
+					}
+					logger.SimappLog.Infof("message DEL %v success", rsp.StatusCode)
+				}
+				err := rsp.Body.Close()
+				if err != nil {
+					logger.SimappLog.Errorln(err)
+				}
+				break
 			}
-			break
-		}
+		}()
 	}
 }
 
