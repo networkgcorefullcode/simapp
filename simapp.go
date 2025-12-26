@@ -203,10 +203,11 @@ const (
 var httpProtocol string
 
 type configMessage struct {
-	msgPtr  *bytes.Buffer
-	msgType int
-	name    string
-	msgOp   int
+	msgPtr   *bytes.Buffer
+	msgType  int
+	name     string
+	msgOp    int
+	poolChan chan any
 }
 
 func (msg configMessage) String() string {
@@ -513,6 +514,9 @@ func sendMessage(msgChan chan configMessage, subProvisionEndpt SubProvisionEndpt
 
 	for msg := range msgChan {
 		go func() {
+			defer func() {
+				<-msg.poolChan
+			}()
 			var httpend string
 			var destUrl string
 			logger.SimappLog.Debugln("received message from channel", msg)
@@ -1001,7 +1005,9 @@ func dispatchAllSubscribers(configMsgChan chan configMessage) {
 			continue
 		}
 		// Compute with concurrency
+		poolChan := make(chan any, SimappConfig.Configuration.MaxSend)
 		for i := start; i <= end; i++ {
+			poolChan <- struct{}{}
 			subscribers.UeId = fmt.Sprintf("%015d", i)
 			logger.SimappLog.Debugln("ueId", subscribers.UeId)
 			b, err := json.Marshal(subscribers)
@@ -1015,6 +1021,7 @@ func dispatchAllSubscribers(configMsgChan chan configMessage) {
 			msg.msgType = subscriber
 			msg.name = subscribers.UeId
 			msg.msgOp = add_op
+			msg.poolChan = poolChan
 			configMsgChan <- msg
 		}
 	}
