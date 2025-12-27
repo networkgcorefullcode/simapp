@@ -30,47 +30,18 @@ configuration:
   # This block is always necessary to establish range(s) of valid IMSIs
   subscribers:
   - ueId-start: "208930100007487"
-    ueId-end: "208930100027510"
-    # ueId-end: "208930100007500"
+    ueId-end: "208930100009510"
     plmnId: "20893"
     opc: "981d464c7c52eb6e5036234984ad0bcf"
     op: ""
     key: "5122250214c33e723a5dd523fc145fc0"
     sequenceNumber: "16f3b3f70fc2"
-  # - ueId-start: "218930100017501"
-  #   ueId-end: "218930100027586"
-  #   plmnId: "20893"
-  #   opc: "981d464c7c52eb6e5036234984ad0bcf"
-  #   op: ""
-  #   key: "5122250214c33e723a5dd523fc145fc0"
-  #   sequenceNumber: "16f3b3f70fc2"
-  # - ueId-start: "228930100017501"
-  #   ueId-end: "228930100027586"
-  #   plmnId: "20893"
-  #   opc: "981d464c7c52eb6e5036234984ad0bcf"
-  #   op: ""
-  #   key: "5122250214c33e723a5dd523fc145fc0"
-  #   sequenceNumber: "16f3b3f70fc2"
-  # - ueId-start: "238930100017501"
-  #   ueId-end: "238930100027586"
-  #   plmnId: "20893"
-  #   opc: "981d464c7c52eb6e5036234984ad0bcf"
-  #   op: ""
-  #   key: "5122250214c33e723a5dd523fc145fc0"
-  #   sequenceNumber: "16f3b3f70fc2"
-  # - ueId-start: "248930100017501"
-  #   ueId-end: "248930100027586"
-  #   plmnId: "20893"
-  #   opc: "981d464c7c52eb6e5036234984ad0bcf"
-  #   op: ""
-  #   key: "5122250214c33e723a5dd523fc145fc0"
-  #   sequenceNumber: "16f3b3f70fc2"
 
   # Configure Device Groups (ignored if provision-network-slice is disabled)
   device-groups:
   - name:  "gnbsim-user-group1"
     imsi-start: "208930100007487"
-    imsi-end: "208930100027510"
+    imsi-end: "208930100009510"
     ip-domain-name: "pool1"
     ip-domain-expanded:
       dnn: internet
@@ -88,88 +59,6 @@ configuration:
           pdb: 300
           pelr: 6
     site-info: "enterprise"
-  # - name:  "gnbsim-user-group2"
-  #   imsi-start: "218930100017501"
-  #   imsi-end: "218930100027586"
-  #   ip-domain-name: "pool1"
-  #   ip-domain-expanded:
-  #     dnn: internet
-  #     dns-primary: "8.8.8.8"        # Value is sent to UE
-  #     mtu: 1460                     # Value is sent to UE when PDU Session Established
-  #     ue-ip-pool: "172.250.0.0/16"  # IP address pool for subscribers
-  #     ue-dnn-qos:
-  #       dnn-mbr-downlink: 1000      # UE level downlink QoS (Maximum bit rate per UE)
-  #       dnn-mbr-uplink:   1000      # UE level uplink QoS (Maximum bit rate per UE)
-  #       bitrate-unit: Mbps          # Unit for above QoS rates
-  #       traffic-class:              # Default bearer QCI/ARP (not used in 5G)
-  #         name: "platinum"
-  #         qci: 9
-  #         arp: 6
-  #         pdb: 300
-  #         pelr: 6
-  #   site-info: "enterprise"
-  # - name:  "gnbsim-user-group3"
-  #   imsi-start: "228930100017501"
-  #   imsi-end: "228930100027586"
-  #   ip-domain-name: "pool1"
-  #   ip-domain-expanded:
-  #     dnn: internet
-  #     dns-primary: "8.8.8.8"        # Value is sent to UE
-  #     mtu: 1460                     # Value is sent to UE when PDU Session Established
-  #     ue-ip-pool: "172.250.0.0/16"  # IP address pool for subscribers
-  #     ue-dnn-qos:
-  #       dnn-mbr-downlink: 1000      # UE level downlink QoS (Maximum bit rate per UE)
-  #       dnn-mbr-uplink:   1000      # UE level uplink QoS (Maximum bit rate per UE)
-  #       bitrate-unit: Mbps          # Unit for above QoS rates
-  #       traffic-class:              # Default bearer QCI/ARP (not used in 5G)
-  #         name: "platinum"
-  #         qci: 9
-  #         arp: 6
-  #         pdb: 300
-  #         pelr: 6
-  #   site-info: "enterprise"
-  # - name:  "gnbsim-user-group4"
-  #   imsi-start: "238930100017501"
-  #   imsi-end: "238930100027586"
-  #   ip-domain-name: "pool1"
-  #   ip-domain-expanded:
-  #     dnn: internet
-  #     dns-primary: "8.8.8.8"        # Value is sent to UE
-  #     mtu: 1460                     # Value is sent to UE when PDU Session Established
-  #     ue-ip-pool: "172.250.0.0/16"  # IP address pool for subscribers
-  #     ue-dnn-qos:
-  #       dnn-mbr-downlink: 1000      # UE level downlink QoS (Maximum bit rate per UE)
-  #       dnn-mbr-uplink:   1000      # UE level uplink QoS (Maximum bit rate per UE)
-  #       bitrate-unit: Mbps          # Unit for above QoS rates
-  #       traffic-class:              # Default bearer QCI/ARP (not used in 5G)
-  #         name: "platinum"
-  #         qci: 9
-  #         arp: 6
-  #         pdb: 300
-  #         pelr: 6
-  #   site-info: "enterprise"
-  # - name:  "gnbsim-user-group5"
-  #   imsi-start: "248930100017501"
-  #   imsi-end: "248930100027586"
-  #   ip-domain-name: "pool1"
-  #   ip-domain-expanded:
-  #     dnn: internet
-  #     dns-primary: "8.8.8.8"        # Value is sent to UE
-  #     mtu: 1460                     # Value is sent to UE when PDU Session Established
-  #     ue-ip-pool: "172.250.0.0/16"  # IP address pool for subscribers
-  #     ue-dnn-qos:
-  #       dnn-mbr-downlink: 1000      # UE level downlink QoS (Maximum bit rate per UE)
-  #       dnn-mbr-uplink:   1000      # UE level uplink QoS (Maximum bit rate per UE)
-  #       bitrate-unit: Mbps          # Unit for above QoS rates
-  #       traffic-class:              # Default bearer QCI/ARP (not used in 5G)
-  #         name: "platinum"
-  #         qci: 9
-  #         arp: 6
-  #         pdb: 300
-  #         pelr: 6
-  #   site-info: "enterprise"
-  # UPF allocates IP address if there is only 1 device-group
-  # SMF allocates IP address if there is >1 device-group
 
   # Configure Network Slices (ignored if provision-network-slice is disabled)
   network-slices:
@@ -179,12 +68,6 @@ configuration:
       sst: 1
     site-device-group:
     - "gnbsim-user-group1"   # All UEs in this device-group are assigned to this slice
-    # - "gnbsim-user-group2"
-    # - "gnbsim-user-group3"
-    # - "gnbsim-user-group4"
-    # - "gnbsim-user-group5"
-    # Applicaiton filters control what each user can access.
-    # Default, allow access to all applications
     application-filtering-rules:
     - rule-name: "ALLOW-ALL"
       priority: 250
